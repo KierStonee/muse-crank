@@ -1,0 +1,777 @@
+<title>Muse Crank</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a slot-machine cabinet — three reel windows in a row, a brass PULL button beneath, a payout tray revealing the combo + extracted palette below. Single dark arcade-cabinet theme by design. */
+:root{
+  --bg:#141019;
+  --cabinet:#241c30;
+  --cabinet-2:#2d2339;
+  --reel:#f3ead3;
+  --reel-2:#ece0c4;
+  --ink:#2a2014;
+  --ink-soft:#6b5d47;
+  --fg:#f1e9f4;
+  --muted:#a89ab8;
+  --brass:#d9a441;
+  --brass-soft:#8a713a;
+  --jackpot:#e8543a;
+  --jackpot-dark:#b73a26;
+  --line:#3c3149;
+  color-scheme:dark;
+  font-size:16px;
+}
+*{box-sizing:border-box}
+body{
+  background:
+    radial-gradient(ellipse at 50% -10%, #2a2135 0%, transparent 60%),
+    var(--bg);
+  color:var(--fg);
+  font-family:Archivo, "Helvetica Neue", Arial, sans-serif;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+}
+.stage{
+  max-width:980px;
+  margin:0 auto;
+  padding-block:32px 48px;
+  display:flex;
+  flex-direction:column;
+  gap:28px;
+}
+
+/* marquee header */
+.marquee{ text-align:center; }
+.bulbs{
+  height:10px;
+  margin:0 auto 14px;
+  max-width:560px;
+  background-image:radial-gradient(circle, var(--brass) 2px, transparent 2.6px);
+  background-size:18px 10px;
+  background-repeat:repeat-x;
+  opacity:.8;
+}
+h1{
+  font-family:"Bebas Neue", Impact, sans-serif;
+  font-size:clamp(2.6rem, 7vw, 4.2rem);
+  letter-spacing:.06em;
+  margin:0;
+  color:var(--fg);
+  text-shadow:0 0 18px rgba(217,164,65,.35);
+  text-wrap:balance;
+}
+.tagline{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:.95rem;
+}
+
+/* cabinet */
+.cabinet{
+  background:linear-gradient(180deg, var(--cabinet-2), var(--cabinet));
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:22px;
+  position:relative;
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.bolt{
+  position:absolute;
+  width:10px; height:10px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #efc877, var(--brass-soft));
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.3);
+}
+.bolt.tl{top:12px;left:12px} .bolt.tr{top:12px;right:12px}
+.bolt.bl{bottom:12px;left:12px} .bolt.br{bottom:12px;right:12px}
+
+.reels{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:14px;
+}
+@media (max-width:720px){
+  .reels{ grid-template-columns:1fr; }
+}
+
+.reel{
+  background:var(--cabinet);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.reel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 2px;
+}
+.reel-label{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:.72rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--brass);
+}
+.lock-btn{
+  background:none;
+  border:1px solid var(--line);
+  border-radius:6px;
+  color:var(--muted);
+  font-size:.85rem;
+  line-height:1;
+  padding:4px 6px;
+  cursor:pointer;
+}
+.lock-btn[aria-pressed="true"]{
+  color:var(--brass);
+  border-color:var(--brass-soft);
+  background:rgba(217,164,65,.1);
+}
+.lock-btn:focus-visible, li:focus-visible, button:focus-visible{
+  outline:2px solid var(--brass);
+  outline-offset:2px;
+}
+
+.reel-list{
+  list-style:none;
+  margin:0;
+  padding:4px;
+  height:232px;
+  overflow-y:auto;
+  background:linear-gradient(180deg, var(--reel), var(--reel-2));
+  border-radius:8px;
+  box-shadow:inset 0 2px 10px rgba(0,0,0,.35);
+  scrollbar-width:thin;
+}
+.reel-list li{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 8px;
+  border-radius:5px;
+  color:var(--ink);
+  font-size:.86rem;
+  font-weight:500;
+  cursor:pointer;
+  user-select:none;
+}
+.reel-list li .idx{
+  font-family:"IBM Plex Mono", monospace;
+  font-variant-numeric:tabular-nums;
+  font-size:.72rem;
+  color:var(--ink-soft);
+  width:2.2em;
+  flex:none;
+}
+.reel-list li img{
+  width:28px; height:28px;
+  object-fit:cover;
+  border-radius:4px;
+  flex:none;
+  background:var(--ink-soft);
+}
+.reel-list li.selected{
+  background:var(--jackpot);
+  color:#fff7ed;
+}
+.reel-list li.selected .idx{ color:#ffd9cc; }
+.reel-list li.spinning{ background:rgba(42,32,20,.08); }
+
+.frame-foot{
+  display:flex;
+  justify-content:center;
+}
+.ghost-btn{
+  background:none;
+  border:1px dashed var(--brass-soft);
+  color:var(--brass);
+  font-family:"IBM Plex Mono", monospace;
+  font-size:.72rem;
+  letter-spacing:.04em;
+  border-radius:7px;
+  padding:6px 10px;
+  cursor:pointer;
+}
+.ghost-btn:hover{ background:rgba(217,164,65,.08); }
+
+.controls{
+  display:flex;
+  justify-content:center;
+  margin-top:20px;
+}
+.pull-btn{
+  font-family:"Bebas Neue", Impact, sans-serif;
+  font-size:1.4rem;
+  letter-spacing:.1em;
+  color:#fff3ec;
+  background:radial-gradient(circle at 35% 30%, var(--jackpot), var(--jackpot-dark));
+  border:none;
+  border-radius:999px;
+  width:132px; height:132px;
+  box-shadow:0 10px 0 var(--jackpot-dark), 0 18px 30px -8px rgba(0,0,0,.6), inset 0 2px 4px rgba(255,255,255,.3);
+  cursor:pointer;
+  transition:transform .08s ease;
+}
+.pull-btn:active{
+  transform:translateY(6px);
+  box-shadow:0 4px 0 var(--jackpot-dark), 0 10px 18px -8px rgba(0,0,0,.6), inset 0 2px 4px rgba(255,255,255,.3);
+}
+.pull-btn:disabled{ opacity:.7; cursor:default; }
+
+/* tray */
+.tray{
+  display:flex;
+  gap:24px;
+  flex-wrap:wrap;
+  background:var(--cabinet);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:22px;
+}
+.tray-combo{
+  flex:1 1 220px;
+  min-width:0;
+}
+.tray-eyebrow{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:.7rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.tray-combo h2{
+  font-family:"Bebas Neue", Impact, sans-serif;
+  font-size:2.6rem;
+  letter-spacing:.03em;
+  margin:4px 0 2px;
+  color:var(--brass);
+  text-wrap:balance;
+}
+.tray-combo p{
+  margin:0;
+  color:var(--fg);
+  font-size:1rem;
+}
+.tray-palette{
+  flex:1 1 280px;
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  min-width:0;
+}
+.tray-palette img{
+  width:92px; height:92px;
+  object-fit:cover;
+  border-radius:10px;
+  border:1px solid var(--line);
+  flex:none;
+}
+.swatches{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:8px;
+  flex:1;
+  min-width:0;
+}
+.swatch{
+  border-radius:8px;
+  padding:10px 8px 8px;
+  cursor:pointer;
+  border:1px solid rgba(0,0,0,.15);
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  height:52px;
+  min-width:0;
+  position:relative;
+}
+.swatch .hex{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:.66rem;
+  font-weight:600;
+  background:rgba(0,0,0,.35);
+  color:#fff;
+  padding:2px 5px;
+  border-radius:4px;
+  align-self:flex-start;
+}
+.swatch.copied .hex::after{ content:" ✓"; }
+
+.credits{
+  text-align:center;
+  color:var(--muted);
+  font-size:.74rem;
+  padding-bottom:4px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .pull-btn, .reel-list li{ transition:none; }
+}
+</style>
+
+<div class="stage">
+  <header class="marquee">
+    <div class="bulbs"></div>
+    <h1>MUSE CRANK</h1>
+    <p class="tagline">Pull three reels. Walk away with a brand, a business, and a palette.</p>
+  </header>
+
+  <div class="cabinet">
+    <span class="bolt tl"></span><span class="bolt tr"></span><span class="bolt bl"></span><span class="bolt br"></span>
+    <div class="reels">
+      <section class="reel" data-reel="category">
+        <div class="reel-head">
+          <span class="reel-label">01 · Category</span>
+          <button class="lock-btn" data-lock="category" aria-pressed="false" title="Lock this reel">🔓</button>
+        </div>
+        <ul class="reel-list" id="list-category" role="listbox" aria-label="Category" tabindex="0"></ul>
+      </section>
+
+      <section class="reel" data-reel="brand">
+        <div class="reel-head">
+          <span class="reel-label">02 · Brand Name</span>
+          <button class="lock-btn" data-lock="brand" aria-pressed="false" title="Lock this reel">🔓</button>
+        </div>
+        <ul class="reel-list" id="list-brand" role="listbox" aria-label="Brand name" tabindex="0"></ul>
+      </section>
+
+      <section class="reel" data-reel="frame">
+        <div class="reel-head">
+          <span class="reel-label">03 · Color Source</span>
+          <button class="lock-btn" data-lock="frame" aria-pressed="false" title="Lock this reel">🔓</button>
+        </div>
+        <ul class="reel-list" id="list-frame" role="listbox" aria-label="Color source photo" tabindex="0"></ul>
+        <div class="frame-foot">
+          <button class="ghost-btn" id="addPhotoBtn" type="button">+ Add a photo</button>
+          <input type="file" id="photoInput" accept="image/*" hidden>
+        </div>
+      </section>
+    </div>
+
+    <div class="controls">
+      <button id="pullBtn" class="pull-btn" type="button">PULL</button>
+    </div>
+  </div>
+
+  <section class="tray" id="tray">
+    <div class="tray-combo">
+      <span class="tray-eyebrow">Today's pull</span>
+      <h2 id="comboBrand">—</h2>
+      <p id="comboCategory">—</p>
+    </div>
+    <div class="tray-palette">
+      <img id="frameImg" alt="Selected color-source photo" crossorigin="anonymous">
+      <div class="swatches" id="swatches"></div>
+    </div>
+  </section>
+
+  <footer class="credits">Photos courtesy of Lorem Picsum. Photos you add stay on this device only, never uploaded anywhere.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var CATEGORIES = [
+    "Interstate Moving Co.","Hot Sauce Brand","Dog-Walking App","Vinyl Record Shop",
+    "Rooftop Bar","Meal Kit Service","Boutique Hotel","Electric Bike Brand",
+    "Coworking Space","Artisan Soap Maker","Podcast Network","Craft Brewery",
+    "Rocket Fuel Startup","Plant Delivery Service","Skateboard Brand","Tattoo Studio",
+    "Dating App","Pet Insurance","Cold Brew Coffee","Yoga Studio",
+    "Flower Subscription","Car Wash","Taco Truck","Vitamin Brand",
+    "Food Bank Nonprofit","Kids' Toy Line","Streaming Service","Family Law Firm",
+    "Bike Repair Shop","Candle Company","Credit Union","Indie Game Studio",
+    "Regional Airline","Daycare Center","Bookstore Café","Satellite Launch Company",
+    "Grocery Store","Children's Clothing Line","Frozen Yogurt Shop","Men's Barbershop",
+    "Women's Activewear","Used Bookstore","Dry Cleaner","Laundromat",
+    "Hardware Store","Nail Salon","Day Spa","Mattress Company",
+    "Moving Box Supplier","Pizza Chain","Fast Food Chain","Soda Brand",
+    "Craft Beer Bar","Winery","Kombucha Brand","Energy Drink",
+    "Protein Bar Brand","Meal Replacement Shake","Pet Grooming Salon","Dog Treat Bakery",
+    "Aquarium Supply Store","Farmers Market Stand","Food Truck Festival","Ice Cream Parlor",
+    "Donut Shop","Bagel Shop","Sandwich Shop","Ramen Shop",
+    "Sushi Counter","BBQ Joint","Vegan Bakery","Gluten-Free Bakery",
+    "Juice Bar","Smoothie Bar","Cigar Lounge","Vape Shop",
+    "Thrift Store","Antique Mall","Consignment Shop","Pawn Shop",
+    "Locksmith","Plumbing Company","Roofing Company","Landscaping Company",
+    "Pest Control Service","Home Security Company","Solar Panel Installer","Window Washing Service",
+    "Furniture Rental Company","Self-Storage Facility","Pet Sitting App","House-Cleaning Service",
+    "Personal Styling Service","Resume-Writing Service","Tutoring Service","Driving School",
+    "Music Lesson Studio","Dance Studio","Martial Arts Gym","Climbing Gym"
+  ];
+
+  var BRANDS = [
+    "Fizz","Marrow","Ziggy","Ripple","Linden","Ember","Hollow","Nibble",
+    "Wisteria","Nook","Rowan","Mimic","Harbor","Marigold","Petrel","Juniper",
+    "Thistle","Bramble","Wobble","Doodle","Clover & Co.","Mabel's","Pippin","Vex",
+    "Nyra","Axiom","Cobalt","Quill","Flux","Monarch","Satchel","Kindle",
+    "Nell's","Hollis","Birdie","Lumen",
+    "Wren","Fable","Tumble","Gable","Haven","Drift","Coral","Basil",
+    "Moth","Pebble","Spruce","Acorn","Finch","Otter","Willow","Hazel",
+    "Clove","Saffron","Ginger & Fox","Marlow","Lark","Tansy","Fennel","Nettle",
+    "Rue","Indigo","Ochre","Slate","Pewter","Brass & Bone","Tinder","Spark",
+    "Glint","Static","Pulse","Arcadia","Nomad","Compass","Anchor","Beacon",
+    "Lantern","Hearth","Hollow Oak","Pine & Co.","Birch","Cedarwood","Maple's","Gourd",
+    "Honeybloom","Tumbleweed","Prairie","Meadowlark","Foxglove","Thornbury","Wick","Ember & Ash",
+    "Velvet Crow","Quail","Sparrow & Sage","Mossy","Fernwood","Dapple","Gloaming","Nocturne"
+  ];
+
+  var FRAME_IDS = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180];
+
+  var frames = FRAME_IDS.map(function(id){
+    return { key:"p"+id, src:"https://picsum.photos/id/"+id+"/320/240", custom:false };
+  });
+
+  function loadCustomFrames(){
+    try{
+      var raw = localStorage.getItem("museMachineCustomFrames");
+      if(!raw) return;
+      var list = JSON.parse(raw);
+      list.forEach(function(src, i){
+        frames.push({ key:"custom-"+i, src:src, custom:true });
+      });
+    }catch(e){ /* storage unavailable — carry on without custom frames */ }
+  }
+  loadCustomFrames();
+
+  function saveCustomFrames(){
+    try{
+      var customSrcs = frames.filter(function(f){ return f.custom; }).map(function(f){ return f.src; });
+      if(customSrcs.length > 24) customSrcs = customSrcs.slice(customSrcs.length - 24);
+      localStorage.setItem("museMachineCustomFrames", JSON.stringify(customSrcs));
+    }catch(e){ /* quota or privacy mode — custom photo just won't persist */ }
+  }
+
+  var state = {
+    category: 0,
+    brand: 0,
+    frame: Math.floor(Math.random() * frames.length),
+    locked: { category:false, brand:false, frame:false }
+  };
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var listEls = {
+    category: document.getElementById("list-category"),
+    brand: document.getElementById("list-brand"),
+    frame: document.getElementById("list-frame")
+  };
+
+  function renderList(reelKey){
+    var el = listEls[reelKey];
+    var items = reelKey === "category" ? CATEGORIES : reelKey === "brand" ? BRANDS : frames;
+    el.innerHTML = "";
+    items.forEach(function(item, i){
+      var li = document.createElement("li");
+      li.setAttribute("role","option");
+      li.tabIndex = -1;
+      li.dataset.index = i;
+      if(reelKey === "frame"){
+        var img = document.createElement("img");
+        img.src = item.src;
+        img.alt = "";
+        var span = document.createElement("span");
+        span.textContent = item.custom ? "Your photo" : "Frame " + String(FRAME_IDS[i] !== undefined ? FRAME_IDS[i] : i).padStart(3,"0");
+        li.appendChild(img);
+        li.appendChild(span);
+      } else {
+        var idx = document.createElement("span");
+        idx.className = "idx";
+        idx.textContent = String(i+1).padStart(2,"0");
+        var label = document.createElement("span");
+        label.textContent = item;
+        li.appendChild(idx);
+        li.appendChild(label);
+      }
+      li.addEventListener("click", function(){ select(reelKey, i); });
+      li.addEventListener("keydown", function(e){
+        if(e.key === "Enter" || e.key === " "){ e.preventDefault(); select(reelKey, i); }
+      });
+      el.appendChild(li);
+    });
+    highlight(reelKey);
+  }
+
+  function highlight(reelKey){
+    var el = listEls[reelKey];
+    var selIdx = state[reelKey];
+    Array.prototype.forEach.call(el.children, function(li, i){
+      var isSel = i === selIdx;
+      li.classList.toggle("selected", isSel);
+      li.setAttribute("aria-selected", isSel ? "true" : "false");
+    });
+  }
+
+  function scrollIntoViewIfNeeded(reelKey){
+    var el = listEls[reelKey];
+    var li = el.children[state[reelKey]];
+    if(li) li.scrollIntoView({ block:"nearest" });
+  }
+
+  function select(reelKey, index, opts){
+    opts = opts || {};
+    state[reelKey] = index;
+    highlight(reelKey);
+    if(!opts.skipScroll) scrollIntoViewIfNeeded(reelKey);
+    updateResult(reelKey);
+  }
+
+  // ---- color extraction ----
+
+  function hashString(str){
+    var h = 0;
+    for(var i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) | 0; }
+    return Math.abs(h);
+  }
+
+  function fallbackPalette(seedKey){
+    var h = hashString(seedKey);
+    var base = [
+      ["#8a5a44","#c9896a","#e8c79e","#4a3327","#d9a441","#2f241c"],
+      ["#3a5a63","#6fa1a8","#cfe3df","#20343a","#e8543a","#17282c"],
+      ["#5c4a6b","#8d78a3","#d8c9e6","#2f2436","#d9a441","#1c1620"]
+    ];
+    return base[h % base.length];
+  }
+
+  function rgbToHex(r,g,b){
+    return "#" + [r,g,b].map(function(v){
+      return Math.max(0,Math.min(255,v)).toString(16).padStart(2,"0");
+    }).join("");
+  }
+
+  function extractPaletteFromImage(imgEl, swatchCount){
+    swatchCount = swatchCount || 6;
+    var canvas = document.createElement("canvas");
+    var w = 60, h = 45;
+    canvas.width = w; canvas.height = h;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(imgEl, 0, 0, w, h);
+    var data = ctx.getImageData(0, 0, w, h).data;
+
+    var buckets = {};
+    for(var i=0; i<data.length; i+=4){
+      var a = data[i+3];
+      if(a < 200) continue;
+      var r = data[i], g = data[i+1], b = data[i+2];
+      var br = Math.round(r/32)*32, bg = Math.round(g/32)*32, bb = Math.round(b/32)*32;
+      var key = br+","+bg+","+bb;
+      if(!buckets[key]) buckets[key] = { count:0, r:0, g:0, b:0 };
+      buckets[key].count++;
+      buckets[key].r += r; buckets[key].g += g; buckets[key].b += b;
+    }
+
+    var sorted = Object.keys(buckets).map(function(k){
+      var bucket = buckets[k];
+      return {
+        count: bucket.count,
+        r: Math.round(bucket.r/bucket.count),
+        g: Math.round(bucket.g/bucket.count),
+        b: Math.round(bucket.b/bucket.count)
+      };
+    }).sort(function(a,b){ return b.count - a.count; });
+
+    var picked = [];
+    var minDist = 42;
+    for(var j=0; j<sorted.length && picked.length < swatchCount; j++){
+      var c = sorted[j];
+      var farEnough = picked.every(function(p){
+        var dr=p.r-c.r, dg=p.g-c.g, db=p.b-c.b;
+        return Math.sqrt(dr*dr+dg*dg+db*db) > minDist;
+      });
+      if(farEnough) picked.push(c);
+    }
+    while(picked.length < swatchCount && sorted.length){
+      picked.push(sorted[picked.length % sorted.length]);
+    }
+    return picked.map(function(c){ return rgbToHex(c.r,c.g,c.b); });
+  }
+
+  function renderSwatches(hexList){
+    var el = document.getElementById("swatches");
+    el.innerHTML = "";
+    hexList.forEach(function(hex){
+      var sw = document.createElement("div");
+      sw.className = "swatch";
+      sw.style.background = hex;
+      var label = document.createElement("span");
+      label.className = "hex";
+      label.textContent = hex;
+      sw.appendChild(label);
+      sw.title = "Copy " + hex;
+      sw.addEventListener("click", function(){
+        copyText(hex).then(function(){
+          sw.classList.add("copied");
+          setTimeout(function(){ sw.classList.remove("copied"); }, 900);
+        });
+      });
+      el.appendChild(sw);
+    });
+  }
+
+  function copyText(text){
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        return navigator.clipboard.writeText(text).catch(function(){ return legacyCopy(text); });
+      }
+    }catch(e){}
+    return Promise.resolve(legacyCopy(text));
+  }
+  function legacyCopy(text){
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }catch(e){}
+  }
+
+  function updatePaletteFromCurrentFrame(){
+    var frame = frames[state.frame];
+    var imgEl = document.getElementById("frameImg");
+
+    function onReady(){
+      try{
+        var hexList = extractPaletteFromImage(imgEl, 6);
+        renderSwatches(hexList);
+      }catch(e){
+        renderSwatches(fallbackPalette(frame.key));
+      }
+    }
+
+    var probe = new Image();
+    probe.crossOrigin = "anonymous";
+    probe.onload = function(){
+      imgEl.src = frame.src;
+      onReady();
+    };
+    probe.onerror = function(){
+      imgEl.src = frame.src;
+      renderSwatches(fallbackPalette(frame.key));
+    };
+    probe.src = frame.src;
+  }
+
+  function updateResult(changedReel){
+    document.getElementById("comboBrand").textContent = BRANDS[state.brand];
+    document.getElementById("comboCategory").textContent = CATEGORIES[state.category];
+    if(changedReel === "frame" || changedReel === undefined){
+      updatePaletteFromCurrentFrame();
+    }
+  }
+
+  // ---- pull / spin ----
+
+  function randomIndex(n, excluding){
+    if(n <= 1) return 0;
+    var i;
+    do { i = Math.floor(Math.random() * n); } while(i === excluding && n > 1);
+    return i;
+  }
+
+  function spinReel(reelKey, length, finalIndex, onDone){
+    var el = listEls[reelKey];
+    if(reduceMotion){
+      select(reelKey, finalIndex);
+      onDone();
+      return;
+    }
+    var steps = 14;
+    var delay = 40;
+    var i = 0;
+    function tick(){
+      var idx = i < steps - 1 ? Math.floor(Math.random() * length) : finalIndex;
+      select(reelKey, idx, { skipScroll: i < steps - 1 ? false : false });
+      i++;
+      if(i < steps){
+        delay = delay * 1.14;
+        setTimeout(tick, delay);
+      } else {
+        onDone();
+      }
+    }
+    tick();
+  }
+
+  function pull(){
+    var pullBtn = document.getElementById("pullBtn");
+    pullBtn.disabled = true;
+
+    var jobs = [];
+    if(!state.locked.category) jobs.push({ key:"category", length:CATEGORIES.length, final:randomIndex(CATEGORIES.length, state.category) });
+    if(!state.locked.brand) jobs.push({ key:"brand", length:BRANDS.length, final:randomIndex(BRANDS.length, state.brand) });
+    if(!state.locked.frame) jobs.push({ key:"frame", length:frames.length, final:randomIndex(frames.length, state.frame) });
+
+    if(!jobs.length){ pullBtn.disabled = false; return; }
+
+    var remaining = jobs.length;
+    jobs.forEach(function(job, i){
+      setTimeout(function(){
+        spinReel(job.key, job.length, job.final, function(){
+          remaining--;
+          if(remaining === 0) pullBtn.disabled = false;
+        });
+      }, i * 90);
+    });
+  }
+
+  document.getElementById("pullBtn").addEventListener("click", pull);
+
+  document.querySelectorAll(".lock-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var key = btn.dataset.lock;
+      state.locked[key] = !state.locked[key];
+      btn.setAttribute("aria-pressed", state.locked[key] ? "true" : "false");
+      btn.textContent = state.locked[key] ? "🔒" : "🔓";
+    });
+  });
+
+  // ---- add your own photo ----
+
+  var addPhotoBtn = document.getElementById("addPhotoBtn");
+  var photoInput = document.getElementById("photoInput");
+  addPhotoBtn.addEventListener("click", function(){ photoInput.click(); });
+  photoInput.addEventListener("change", function(){
+    var file = photoInput.files && photoInput.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var maxDim = 480;
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        var c = document.createElement("canvas");
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
+        var ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        var dataUrl = c.toDataURL("image/jpeg", 0.82);
+        frames.push({ key:"custom-"+Date.now(), src:dataUrl, custom:true });
+        saveCustomFrames();
+        renderList("frame");
+        select("frame", frames.length - 1);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+    photoInput.value = "";
+  });
+
+  // ---- boot ----
+
+  renderList("category");
+  renderList("brand");
+  renderList("frame");
+  updateResult();
+})();
+</script>
