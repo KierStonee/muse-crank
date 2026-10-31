@@ -304,11 +304,35 @@ h1{
 .swatch.copied .hex::after{ content:" ✓"; }
 
 .credits{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
   text-align:center;
   color:var(--muted);
   font-size:.74rem;
   padding-bottom:4px;
 }
+.coffee-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 20px;
+  border-radius:999px;
+  background:linear-gradient(180deg, var(--brass), var(--brass-soft));
+  color:#241c14;
+  font-family:"IBM Plex Mono", monospace;
+  font-weight:600;
+  font-size:.78rem;
+  letter-spacing:.03em;
+  text-decoration:none;
+  border:1px solid rgba(0,0,0,.25);
+  box-shadow:0 6px 14px -6px rgba(0,0,0,.6);
+  transition:transform .08s ease;
+}
+.coffee-btn:hover{ transform:translateY(-1px); }
+.coffee-btn:active{ transform:translateY(0); }
+.coffee-btn:focus-visible{ outline:2px solid var(--brass); outline-offset:3px; }
 
 @media (prefers-reduced-motion: reduce){
   .pull-btn, .reel-list li{ transition:none; }
@@ -371,7 +395,12 @@ h1{
     </div>
   </section>
 
-  <footer class="credits">Photos courtesy of Lorem Picsum. Photos you add stay on this device only, never uploaded anywhere.</footer>
+  <footer class="credits">
+    <a class="coffee-btn" href="https://buymeacoffee.com/kierstonee" target="_blank" rel="noopener noreferrer">
+      <span aria-hidden="true">☕</span> Buy me a coffee
+    </a>
+    <p>Photos courtesy of Lorem Picsum. Photos you add stay on this device only, never uploaded anywhere.</p>
+  </footer>
 </div>
 
 <script>
